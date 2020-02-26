@@ -334,7 +334,7 @@ printf("incoming\n");
 //printf("receive n=%d, \n", n);
 			for ( xi=0 ; xi<n ; xi++) {
 					xch = tmpBuffer[xi];
-printf("%c", xch);
+printf(">>%c", xch);
 					pthread_mutex_lock(&buf_mut_p2);				
 					*pWritePtr_p2 = xch;
 					wRxCounter_p2++;
@@ -466,7 +466,7 @@ int8_t *bptr, xch;
 			xch = *pReadPtr_p2;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
-printf("-%c",xch);
+printf("---%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
@@ -618,7 +618,7 @@ char default_message=1;
 		if(iResult == 1)
 		{
 			printf("read success\n");
-			printf("%s\n",rdData);
+			printf("+++%s\n",rdData);
 			usleep(50);
 			//if(rdData==tdData)
 			//{printf("pass\n");}
