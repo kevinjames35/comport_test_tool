@@ -323,7 +323,7 @@ void* _IncomeInQueueThread_p2(void* object)
 unsigned char tmpBuffer[60];
 int xi,n;
 u_int8_t xch;
-//printf("incoming\n");
+printf("incoming\n");
 	while(1)
 	{
 
@@ -334,7 +334,7 @@ u_int8_t xch;
 //printf("receive n=%d, \n", n);
 			for ( xi=0 ; xi<n ; xi++) {
 					xch = tmpBuffer[xi];
-//printf("%c", xch);
+printf("%c", xch);
 					pthread_mutex_lock(&buf_mut_p2);				
 					*pWritePtr_p2 = xch;
 					wRxCounter_p2++;
@@ -466,7 +466,7 @@ int8_t *bptr, xch;
 			xch = *pReadPtr_p2;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
-printf("%c",xch);
+printf("-%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
@@ -515,7 +515,7 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	set_interface_attribs_p1(B1200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
-pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
+//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	iResult = 1;
 	
 	
@@ -548,7 +548,7 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	set_interface_attribs_p2(B1200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
-pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
+pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _IncomeInQueueThread_p2, (void*)(0));
 	iResult = 1;
 	
 	
