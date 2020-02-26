@@ -135,12 +135,12 @@ u_int8_t xch;
 			for ( xi=0 ; xi<n ; xi++) {
 					xch = tmpBuffer[xi];
 //printf("%c", xch);
-					pthread_mutex_lock(&buf_mut);				
+					pthread_mutex_lock(&buf_mut_p1);				
 					*pWritePtr = xch;
 					wRxCounter++;
 					if ( pWritePtr == pRxBufferEnd ) pWritePtr = pRxBufferStart;
 					else				    pWritePtr++;
-					pthread_mutex_unlock(&buf_mut);
+					pthread_mutex_unlock(&buf_mut_p1);
 			}
 //printf("\n");
 		}
@@ -171,11 +171,11 @@ int flag = 0;
 					flag = 1;
 					pReadPtr = pRxBufferStart;
 				}
-				if ( xch == 0x5D){
-					flag = 0;
-					*pReadPtr = xch;		
-					printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
-				}
+				//if ( xch == 0x5D){
+				//	flag = 0;
+				//	*pReadPtr = xch;		
+				//	printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
+				//}
 				if ( flag == 1){
 					*pReadPtr = xch;
 					pReadPtr++;
@@ -383,11 +383,11 @@ int flag = 0;
 					flag = 1;
 					pReadPtr = pRxBufferStart;
 				}
-				if ( xch == 0x5D){
-					flag = 0;
-					*pReadPtr = xch;		
-					printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
-				}
+				//if ( xch == 0x5D){
+				//	flag = 0;
+				//	*pReadPtr = xch;		
+				//	printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
+				//}
 				if ( flag == 1){
 					*pReadPtr = xch;
 					pReadPtr++;
@@ -507,12 +507,15 @@ int8_t *bptr, xch;
 /*****************************/
 /**** Open COM Port 1    *****/
 /*****************************/
-int32_t _OpenPort_p1(char* pComPath)
+int32_t _OpenPort_p1(char *pComNum)
 {
 int iResult = 0;
-
+char pComPath[40];
+//printf("%s\n",pComNum);
+sprintf(pComPath,"/dev/ttyS%s",pComNum);
+//printf("%s\n",pComPath);
 	//fcom = open("/dev/ttyUSB0", O_RDWR | O_NDELAY);
-fcom_p1 = open("/dev/ttyS"+pComPath, O_RDWR | O_NOCTTY);
+fcom_p1 = open(pComPath, O_RDWR | O_NOCTTY);
 	if (fcom_p1 < 0) return 0;
 	//else printf("fcom=%x",fcom);
 	//Buffer pointer initial
@@ -526,7 +529,7 @@ fcom_p1 = open("/dev/ttyS"+pComPath, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p1, NULL);
 	
 
-	set_interface_attribs(B115200); 
+	set_interface_attribs_p1(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 
@@ -538,12 +541,14 @@ fcom_p1 = open("/dev/ttyS"+pComPath, O_RDWR | O_NOCTTY);
 /*****************************/
 /**** Open COM Port 2    *****/
 /*****************************/
-int32_t _OpenPort_p2(char* pComPath)
+int32_t _OpenPort_p2(char *pComNum)
 {
 int iResult = 0;
-
-	//fcom = open("/dev/ttyUSB0", O_RDWR | O_NDELAY);
-fcom2 = open("/dev/ttyS"+pComPath, O_RDWR | O_NOCTTY);
+char pComPath[30];
+sprintf(pComPath,"/dev/ttyS%s",pComNum);
+//printf("%s\n",pComPath);
+	//fcom_p2 = open("/dev/ttyS1", O_RDWR | O_NDELAY);
+fcom_p2 = open(pComPath, O_RDWR | O_NOCTTY);
 	if (fcom_p2 < 0) return 0;
 	//else printf("fcom=%x",fcom);
 	//Buffer pointer initial
@@ -557,7 +562,7 @@ fcom2 = open("/dev/ttyS"+pComPath, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p2, NULL);
 	
 
-	set_interface_attribs(B115200); 
+	set_interface_attribs_p2(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 
@@ -576,10 +581,10 @@ void __printf_usage(char *argv0)
 int main(int argc, char **argv) 
 {
 int iResult = 0;
-char *com_path = "/dev/ttyUSB0";
+//char *com_path = "/dev/ttyUSB0";
 
 char rdData[100];
-char tdData[100];
+char tdData[35];
 int rcvCnt=0;
 int count=0;
 char default_message=1;
@@ -590,8 +595,9 @@ char default_message=1;
 	}
 	for(count=0;count<argc;count++)
 	{
-		if(strcmp("-t",count)==0)
+		if(strcmp("-t",argv[count])==0)
 		{
+			printf("select t port%s\n",argv[count+1]);
 			iResult = _OpenPort_p1(argv[count+1]);
 			if(iResult != 1)
 			{
@@ -599,8 +605,9 @@ char default_message=1;
 			}
 		}
 		
-		if(strcmp("-r",count)==0)
+		if(strcmp("-r",argv[count])==0)
 		{
+			//printf("select r port%s\n",argv[count+1]);
 			iResult = _OpenPort_p2(argv[count+1]);
 			if(iResult != 1)
 			{
@@ -608,7 +615,7 @@ char default_message=1;
 			}
 		}
 		
-		if(strcmp("-s",count)==0)
+		if(strcmp("-s",argv[count])==0)
 		{
 			default_message = 0 ;
 		}
@@ -616,18 +623,22 @@ char default_message=1;
 
 
 
-
+	//tdData="test";
 	pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
-	iResult = _SendBufferLength_p1("C",1);
+	iResult = _SendBufferLength_p1(tdData,1);
 	if(iResult == 1)
 	{		
 		iResult = _ReadBuffer_p2(rdData);
 		if(iResult == 1)
 		{
-			//printf("read success\n");
-			//printf("%s\n",rdData);
-			//usleep(50000);
+			printf("read success\n");
+			printf("%s\n",rdData);
+			usleep(50);
+			//if(rdData==tdData)
+			//{printf("pass\n");}
+			//else
+			//{printf("fail\n");}
 		}
 		else
 		{
