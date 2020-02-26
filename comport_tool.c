@@ -512,7 +512,7 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p1, NULL);
 	
 
-	set_interface_attribs_p1(B115200); 
+	set_interface_attribs_p1(B1200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
@@ -545,7 +545,7 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p2, NULL);
 	
 
-	set_interface_attribs_p2(B115200); 
+	set_interface_attribs_p2(B1200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
@@ -608,7 +608,7 @@ char default_message=1;
 
 
 
-	//tdData="test";
+	strcpy(tdData,"ktest");
 	//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	//pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
 	iResult = _SendBufferLength_p1(tdData,1);
