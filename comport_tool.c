@@ -328,10 +328,10 @@ printf("incoming\n");
 	{
 
 		n=read(fcom_p2, tmpBuffer, 60);
-printf("receive n=%d, \n", n);
+printf("1receive n=%d, \n", n);
 //fflush(stdout);
 		if ( n > 0 && n < 60 ) {
-printf("receive n=%d, \n", n);
+printf("2receive n=%d, \n", n);
 			for ( xi=0 ; xi<n ; xi++) {
 					xch = tmpBuffer[xi];
 printf(">>%c", xch);
@@ -512,7 +512,7 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p1, NULL);
 	
 
-	set_interface_attribs_p1(B1200); 
+	set_interface_attribs_p1(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 //pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
@@ -545,7 +545,7 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	pthread_mutex_init(&buf_mut_p2, NULL);
 	
 
-	set_interface_attribs_p2(B1200); 
+	set_interface_attribs_p2(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _IncomeInQueueThread_p2, (void*)(0));
