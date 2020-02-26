@@ -184,7 +184,7 @@ u_int8_t *bptr;
 	//if ( !fIgnOpened ) return 0;
 	if ( length < 1 ) return 0;
 	bptr = buffer;
-//printf("send CMD=%s\n", bptr);
+printf("send CMD=%s\n", bptr);
 	write(fcom_p1, bptr, length);
 	tcdrain(fcom_p1);
 	return 1;
@@ -466,7 +466,7 @@ int8_t *bptr, xch;
 			xch = *pReadPtr_p2;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
-//printf("%c",xch);
+printf("%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
