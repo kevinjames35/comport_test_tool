@@ -16,9 +16,11 @@
 int fcom_p1 = -1; 
 int fcom_p2 = -1; 
 
-u_int8_t *pWritePtr, *pReadPtr;
-u_int8_t *pRxBufferStart, *pRxBufferEnd;
-u_int16_t wRxCounter;
+u_int8_t *pWritePtr_p1, *pReadPtr_p1;
+u_int8_t *pRxBufferStart_p1, *pRxBufferEnd_p1;
+u_int8_t *pWritePtr_p2, *pReadPtr_p2;
+u_int8_t *pRxBufferStart_p2, *pRxBufferEnd_p2;
+u_int16_t wRxCounter_p1,wRxCounter_p2;
 u_int32_t dwBaudrate =0 ;
 struct termios old_tios,SerialPortSettings;
 
@@ -26,7 +28,9 @@ pthread_t InQueueID_p1,InQueueID_p2;
 pthread_t CheckingThread_p1,CheckingThread_p2;
 pthread_mutex_t buf_mut_p1,buf_mut_p2;
 
-u_int8_t RxBuffer[BUFFER_SIZE];
+u_int8_t RxBuffer_p1[BUFFER_SIZE];
+
+u_int8_t RxBuffer_p2[BUFFER_SIZE];
 
 int ascii_to_hex(char ch) 
 { 
@@ -48,7 +52,6 @@ int hex_val = -1;
 int32_t str_to_hex(char *hex_str) 
 {
 //receive string sample
-//: [0x7FFD8B]
 int i, len; 
 int32_t hex_tmp, hex_val; 
 char *bptr;
@@ -126,10 +129,10 @@ u_int8_t xch;
 					xch = tmpBuffer[xi];
 //printf("%c", xch);
 					pthread_mutex_lock(&buf_mut_p1);				
-					*pWritePtr = xch;
-					wRxCounter++;
-					if ( pWritePtr == pRxBufferEnd ) pWritePtr = pRxBufferStart;
-					else				    pWritePtr++;
+					*pWritePtr_p1 = xch;
+					wRxCounter_p1++;
+					if ( pWritePtr_p1 == pRxBufferEnd_p1 ) pWritePtr_p1 = pRxBufferStart_p1;
+					else				    pWritePtr_p1++;
 					pthread_mutex_unlock(&buf_mut_p1);
 			}
 //printf("\n");
@@ -159,11 +162,11 @@ int flag = 0;
 			
 				if ( xch == 0x3a)  {
 					flag = 1;
-					pReadPtr = pRxBufferStart;
+					pReadPtr_p1 = pRxBufferStart_p1;
 				}
 				if ( flag == 1){
-					*pReadPtr = xch;
-					pReadPtr++;
+					*pReadPtr_p1 = xch;
+					pReadPtr_p1++;
 				}
 			}
 //printf("\n");
@@ -202,7 +205,7 @@ u_int8_t *bptr, xch;
 	
 	while (!fEnding)
 	{
-		if ( wRxCounter == 0 ) 
+		if ( wRxCounter_p1 == 0 ) 
 		{
 			usleep(2000); //2ms
 			waitCnt++;
@@ -211,11 +214,11 @@ u_int8_t *bptr, xch;
 		else {
 			waitCnt = 0;
 			pthread_mutex_lock(&buf_mut_p1);
-			xch = *pReadPtr;
+			xch = *pReadPtr_p1;
 			*bptr++ = xch;
-			wRxCounter--;
-			if ( pReadPtr == pRxBufferEnd) pReadPtr = pRxBufferStart;
-			else				  pReadPtr++;
+			wRxCounter_p1--;
+			if ( pReadPtr_p1 == pRxBufferEnd_p1) pReadPtr_p1 = pRxBufferStart_p1;
+			else				  pReadPtr_p1++;
 			pthread_mutex_unlock(&buf_mut_p1);
 			rxCnt++;
 			if ( rxCnt == length )  {
@@ -243,7 +246,7 @@ int8_t *bptr, xch;
 	
 	while (!fEnding)
 	{
-		if ( wRxCounter == 0 ) 
+		if ( wRxCounter_p1 == 0 ) 
 		{
 			sleep(5);
 			waitCnt++;
@@ -252,16 +255,16 @@ int8_t *bptr, xch;
 		else {
 			waitCnt = 0;
 			pthread_mutex_lock(&buf_mut_p1);
-			xch = *pReadPtr;
+			xch = *pReadPtr_p1;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
 //printf("%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
-			wRxCounter--;
-			if ( pReadPtr == pRxBufferEnd) pReadPtr = pRxBufferStart;
-			else				  pReadPtr++;
+			wRxCounter_p1--;
+			if ( pReadPtr_p1 == pRxBufferEnd_p1) pReadPtr_p1 = pRxBufferStart_p1;
+			else				  pReadPtr_p1++;
 			pthread_mutex_unlock(&buf_mut_p1);
 			
 			if ( (xch == 0x0a) | (xch ==0x3e) )  {
@@ -333,10 +336,10 @@ u_int8_t xch;
 					xch = tmpBuffer[xi];
 //printf("%c", xch);
 					pthread_mutex_lock(&buf_mut_p2);				
-					*pWritePtr = xch;
-					wRxCounter++;
-					if ( pWritePtr == pRxBufferEnd ) pWritePtr = pRxBufferStart;
-					else				    pWritePtr++;
+					*pWritePtr_p2 = xch;
+					wRxCounter_p2++;
+					if ( pWritePtr_p2 == pRxBufferEnd_p2 ) pWritePtr_p2 = pRxBufferStart_p2;
+					else				    pWritePtr_p2++;
 					pthread_mutex_unlock(&buf_mut_p2);
 			}
 //printf("\n");
@@ -366,11 +369,11 @@ int flag = 0;
 			
 				if ( xch == 0x3a)  {
 					flag = 1;
-					pReadPtr = pRxBufferStart;
+					pReadPtr_p2 = pRxBufferStart_p2;
 				}
 				if ( flag == 1){
-					*pReadPtr = xch;
-					pReadPtr++;
+					*pReadPtr_p2 = xch;
+					pReadPtr_p2++;
 				}
 			}
 //printf("\n");
@@ -409,7 +412,7 @@ u_int8_t *bptr, xch;
 	
 	while (!fEnding)
 	{
-		if ( wRxCounter == 0 ) 
+		if ( wRxCounter_p2 == 0 ) 
 		{
 			usleep(2000); //2ms
 			waitCnt++;
@@ -418,11 +421,11 @@ u_int8_t *bptr, xch;
 		else {
 			waitCnt = 0;
 			pthread_mutex_lock(&buf_mut_p2);
-			xch = *pReadPtr;
+			xch = *pReadPtr_p2;
 			*bptr++ = xch;
-			wRxCounter--;
-			if ( pReadPtr == pRxBufferEnd) pReadPtr = pRxBufferStart;
-			else				  pReadPtr++;
+			wRxCounter_p2--;
+			if ( pReadPtr_p2 == pRxBufferEnd_p2) pReadPtr_p2 = pRxBufferStart_p2;
+			else				  pReadPtr_p2++;
 			pthread_mutex_unlock(&buf_mut_p2);
 			rxCnt++;
 			if ( rxCnt == length )  {
@@ -451,7 +454,7 @@ int8_t *bptr, xch;
 	
 	while (!fEnding)
 	{
-		if ( wRxCounter == 0 ) 
+		if ( wRxCounter_p2 == 0 ) 
 		{
 			sleep(5);
 			waitCnt++;
@@ -460,16 +463,16 @@ int8_t *bptr, xch;
 		else {
 			waitCnt = 0;
 			pthread_mutex_lock(&buf_mut_p2);
-			xch = *pReadPtr;
+			xch = *pReadPtr_p2;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
 //printf("%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
-			wRxCounter--;
-			if ( pReadPtr == pRxBufferEnd) pReadPtr = pRxBufferStart;
-			else				  pReadPtr++;
+			wRxCounter_p2--;
+			if ( pReadPtr_p2 == pRxBufferEnd_p2) pReadPtr_p2 = pRxBufferStart_p2;
+			else				  pReadPtr_p2++;
 			pthread_mutex_unlock(&buf_mut_p2);
 			
 			if ( (xch == 0x0a) | (xch ==0x3e) )  {
@@ -499,11 +502,11 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	if (fcom_p1 < 0) return 0;
 	//else printf("fcom=%x",fcom_p1);
 	//Buffer pointer initial
-	wRxCounter =0 ;	
-	pWritePtr = &RxBuffer[0];
-	pReadPtr = &RxBuffer[0];
-	pRxBufferStart = &RxBuffer[0];
-	pRxBufferEnd = &RxBuffer[BUFFER_SIZE-1];
+	wRxCounter_p1 =0 ;	
+	pWritePtr_p1 = &RxBuffer_p1[0];
+	pReadPtr_p1 = &RxBuffer_p1[0];
+	pRxBufferStart_p1 = &RxBuffer_p1[0];
+	pRxBufferEnd_p1 = &RxBuffer_p1[BUFFER_SIZE-1];
 	//hook receiver thread
 	//fcom=1;
 	pthread_mutex_init(&buf_mut_p1, NULL);
@@ -512,7 +515,7 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	set_interface_attribs_p1(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
-
+pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	iResult = 1;
 	
 	
@@ -532,11 +535,11 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	if (fcom_p2 < 0) return 0;
 	//else printf("fcom=%x",fcom_p2);
 	//Buffer pointer initial
-	wRxCounter =0 ;	
-	pWritePtr = &RxBuffer[0];
-	pReadPtr = &RxBuffer[0];
-	pRxBufferStart = &RxBuffer[0];
-	pRxBufferEnd = &RxBuffer[BUFFER_SIZE-1];
+	wRxCounter_p1 =0 ;	
+	pWritePtr_p1 = &RxBuffer_p2[0];
+	pReadPtr_p1 = &RxBuffer_p2[0];
+	pRxBufferStart_p1 = &RxBuffer_p2[0];
+	pRxBufferEnd_p1 = &RxBuffer_p2[BUFFER_SIZE-1];
 	//hook receiver thread
 	//fcom=1;
 	pthread_mutex_init(&buf_mut_p2, NULL);
@@ -545,7 +548,7 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	set_interface_attribs_p2(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
-
+pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
 	iResult = 1;
 	
 	
@@ -606,8 +609,8 @@ char default_message=1;
 
 
 	//tdData="test";
-	pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
-	pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
+	//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
+	//pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
 	iResult = _SendBufferLength_p1(tdData,1);
 	if(iResult == 1)
 	{		
