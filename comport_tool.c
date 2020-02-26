@@ -67,17 +67,7 @@ char *bptr;
 	} 
 	return hex_val; 
 } 
-/**********************************************/
-float receive_data_analysis(char* buffer)
-{
-//: [0x800000]-> 0V
-//: [0xFFFFFF]-> +10V
-	float data;
-	data = (( str_to_hex(buffer) - 0x800000 )*(0.000001192));
-	//data_buffer = (data_temp - 0x800000)*(0.000001192);
-	return data;
-	
-}
+
 /***********************************************************/
 /********************************************************/
 /******** for port 1*************************************/
@@ -171,11 +161,6 @@ int flag = 0;
 					flag = 1;
 					pReadPtr = pRxBufferStart;
 				}
-				//if ( xch == 0x5D){
-				//	flag = 0;
-				//	*pReadPtr = xch;		
-				//	printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
-				//}
 				if ( flag == 1){
 					*pReadPtr = xch;
 					pReadPtr++;
@@ -383,11 +368,6 @@ int flag = 0;
 					flag = 1;
 					pReadPtr = pRxBufferStart;
 				}
-				//if ( xch == 0x5D){
-				//	flag = 0;
-				//	*pReadPtr = xch;		
-				//	printf("%8.6f V %s\n",receive_data_analysis(pRxBufferStart),pRxBufferStart);
-				//}
 				if ( flag == 1){
 					*pReadPtr = xch;
 					pReadPtr++;
@@ -510,14 +490,14 @@ int8_t *bptr, xch;
 int32_t _OpenPort_p1(char *pComNum)
 {
 int iResult = 0;
-char pComPath[40];
+//char pComPath[40];
 //printf("%s\n",pComNum);
-sprintf(pComPath,"/dev/ttyS%s",pComNum);
+//sprintf(pComPath,"/dev/ttyS%s",pComNum);
 //printf("%s\n",pComPath);
-	//fcom = open("/dev/ttyUSB0", O_RDWR | O_NDELAY);
-fcom_p1 = open(pComPath, O_RDWR | O_NOCTTY);
+	//fcom_p1 = open("/dev/ttyS4", O_RDWR | O_NDELAY);
+fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
 	if (fcom_p1 < 0) return 0;
-	//else printf("fcom=%x",fcom);
+	//else printf("fcom=%x",fcom_p1);
 	//Buffer pointer initial
 	wRxCounter =0 ;	
 	pWritePtr = &RxBuffer[0];
@@ -544,13 +524,13 @@ fcom_p1 = open(pComPath, O_RDWR | O_NOCTTY);
 int32_t _OpenPort_p2(char *pComNum)
 {
 int iResult = 0;
-char pComPath[30];
-sprintf(pComPath,"/dev/ttyS%s",pComNum);
+//char pComPath[30];
+//sprintf(pComPath,"/dev/ttyS%s",pComNum);
 //printf("%s\n",pComPath);
 	//fcom_p2 = open("/dev/ttyS1", O_RDWR | O_NDELAY);
-fcom_p2 = open(pComPath, O_RDWR | O_NOCTTY);
+fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	if (fcom_p2 < 0) return 0;
-	//else printf("fcom=%x",fcom);
+	//else printf("fcom=%x",fcom_p2);
 	//Buffer pointer initial
 	wRxCounter =0 ;	
 	pWritePtr = &RxBuffer[0];
@@ -603,16 +583,18 @@ char default_message=1;
 			{
 				__printf_usage(argv[0]);
 			}
+			else printf("open t port success\n");
 		}
 		
 		if(strcmp("-r",argv[count])==0)
 		{
-			//printf("select r port%s\n",argv[count+1]);
+			printf("select r port%s\n",argv[count+1]);
 			iResult = _OpenPort_p2(argv[count+1]);
 			if(iResult != 1)
 			{
 				__printf_usage(argv[0]);
 			}
+			else printf("open r port success\n");
 		}
 		
 		if(strcmp("-s",argv[count])==0)
