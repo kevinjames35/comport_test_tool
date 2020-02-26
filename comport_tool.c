@@ -320,21 +320,22 @@ tcgetattr(fcom_p2, &SerialPortSettings);
 
 void* _IncomeInQueueThread_p2(void* object)
 {
-unsigned char tmpBuffer[60];
+u_int8_t tmpBuffer[60];
 int xi,n;
 u_int8_t xch;
-printf("incoming\n");
+//printf("incoming\n");
 	while(1)
 	{
-
 		n=read(fcom_p2, tmpBuffer, 60);
-printf("1receive n=%d, \n", n);
+//printf("1receive n=%d,data=%c \n", n,tmpBuffer[0]);
 //fflush(stdout);
 		if ( n > 0 && n < 60 ) {
-printf("2receive n=%d, \n", n);
+//printf("2receive n=%d, \n", n);
 			for ( xi=0 ; xi<n ; xi++) {
+//printf("%c,",tmpBuffer[xi]);
+
 					xch = tmpBuffer[xi];
-printf(">>%c", xch);
+//printf(" %x ", xch);
 					pthread_mutex_lock(&buf_mut_p2);				
 					*pWritePtr_p2 = xch;
 					wRxCounter_p2++;
@@ -366,15 +367,16 @@ int flag = 0;
 		if ( n > 0 && n < 60 ) {
 			for ( xi=0 ; xi<n ; xi++) {
 				xch = tmpBuffer[xi];
-			
-				if ( xch == 0x3a)  {
-					flag = 1;
-					pReadPtr_p2 = pRxBufferStart_p2;
-				}
-				if ( flag == 1){
-					*pReadPtr_p2 = xch;
-					pReadPtr_p2++;
-				}
+printf("%c",xch);			
+
+	//			if ( xch == 0x3a)  {
+	//				flag = 1;
+//				pReadPtr_p2 = pRxBufferStart_p2;
+	//			}
+	//			if ( flag == 1){
+//				*pReadPtr_p2 = xch;
+//					pReadPtr_p2++;
+	//			}
 			}
 //printf("\n");
 		}
@@ -498,7 +500,7 @@ int iResult = 0;
 //sprintf(pComPath,"/dev/ttyS%s",pComNum);
 //printf("%s\n",pComPath);
 	//fcom_p1 = open("/dev/ttyS4", O_RDWR | O_NDELAY);
-fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY);
+fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fcom_p1 < 0) return 0;
 	//else printf("fcom=%x",fcom_p1);
 	//Buffer pointer initial
@@ -531,7 +533,7 @@ int iResult = 0;
 //sprintf(pComPath,"/dev/ttyS%s",pComNum);
 //printf("%s\n",pComPath);
 	//fcom_p2 = open("/dev/ttyS1", O_RDWR | O_NDELAY);
-fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
+fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fcom_p2 < 0) return 0;
 	//else printf("fcom=%x",fcom_p2);
 	//Buffer pointer initial
@@ -548,7 +550,7 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY);
 	set_interface_attribs_p2(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
-pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _IncomeInQueueThread_p2, (void*)(0));
+pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
 	iResult = 1;
 	
 	
@@ -611,7 +613,7 @@ char default_message=1;
 	strcpy(tdData,"ktest");
 	//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	//pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
-	iResult = _SendBufferLength_p1(tdData,1);
+	iResult = _SendBufferLength_p1(tdData,5);
 	if(iResult == 1)
 	{		
 		iResult = _ReadBuffer_p2(rdData);
