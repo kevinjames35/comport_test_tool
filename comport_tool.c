@@ -328,10 +328,10 @@ printf("incoming\n");
 	{
 
 		n=read(fcom_p2, tmpBuffer, 60);
-//printf("receive n=%d, \n", n);
+printf("receive n=%d, \n", n);
 //fflush(stdout);
 		if ( n > 0 && n < 60 ) {
-//printf("receive n=%d, \n", n);
+printf("receive n=%d, \n", n);
 			for ( xi=0 ; xi<n ; xi++) {
 					xch = tmpBuffer[xi];
 printf("%c", xch);
