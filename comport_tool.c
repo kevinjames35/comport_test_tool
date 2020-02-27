@@ -184,7 +184,7 @@ u_int8_t *bptr;
 	//if ( !fIgnOpened ) return 0;
 	if ( length < 1 ) return 0;
 	bptr = buffer;
-printf("send CMD=%s\n", bptr);
+//printf("send CMD=%s\n", bptr);
 	write(fcom_p1, bptr, length);
 	tcdrain(fcom_p1);
 	return 1;
@@ -370,7 +370,7 @@ int flag = 0;
 		if ( n > 0 && n < 60 ) {
 			for ( xi=0 ; xi<n ; xi++) {
 				xch = tmpBuffer[xi];
-printf("%c",xch);			
+//printf("%c",xch);			
 
 	//			if ( xch == 0x3a)  {
 	//				flag = 1;
@@ -471,7 +471,7 @@ int8_t *bptr, xch;
 			xch = *pReadPtr_p2;
 			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
 				//maybe ignore all CTRL code 
-printf("---%c",xch);
+//printf("---%c",xch);
 				*bptr++ = xch;
 				rxCnt++;
 			}
@@ -547,11 +547,11 @@ fcom_p2 = open(pComNum, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fcom_p2 < 0) return 0;
 	//else printf("fcom=%x",fcom_p2);
 	//Buffer pointer initial
-	wRxCounter_p1 =0 ;	
-	pWritePtr_p1 = &RxBuffer_p2[0];
-	pReadPtr_p1 = &RxBuffer_p2[0];
-	pRxBufferStart_p1 = &RxBuffer_p2[0];
-	pRxBufferEnd_p1 = &RxBuffer_p2[BUFFER_SIZE-1];
+	wRxCounter_p2 =0 ;	
+	pWritePtr_p2 = &RxBuffer_p2[0];
+	pReadPtr_p2 = &RxBuffer_p2[0];
+	pRxBufferStart_p2 = &RxBuffer_p2[0];
+	pRxBufferEnd_p2 = &RxBuffer_p2[BUFFER_SIZE-1];
 	//hook receiver thread
 	//fcom=1;
 	pthread_mutex_init(&buf_mut_p2, NULL);
@@ -592,24 +592,24 @@ char default_message=1;
 	{
 		if(strcmp("-t",argv[count])==0)
 		{
-			printf("select t port%s\n",argv[count+1]);
+			//printf("select t port%s\n",argv[count+1]);
 			iResult = _OpenPort_p1(argv[count+1]);
 			if(iResult != 1)
 			{
 				__printf_usage(argv[0]);
 			}
-			else printf("open t port success\n");
+			//else printf("open t port success\n");
 		}
 		
 		if(strcmp("-r",argv[count])==0)
 		{
-			printf("select r port%s\n",argv[count+1]);
+			//printf("select r port%s\n",argv[count+1]);
 			iResult = _OpenPort_p2(argv[count+1]);
 			if(iResult != 1)
 			{
 				__printf_usage(argv[0]);
 			}
-			else printf("open r port success\n");
+			//else printf("open r port success\n");
 		}
 		
 		if(strcmp("-s",argv[count])==0)
@@ -620,22 +620,22 @@ char default_message=1;
 
 
 
-	strcpy(tdData,"ktest");
+	strcpy(tdData,"lanner test");
 	//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
 	//pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
-	iResult = _SendBufferLength_p1(tdData,5);
+	iResult = _SendBufferLength_p1(tdData,11);
 	if(iResult == 1)
 	{		
-		iResult = _ReadBufferLength_p2(rdData,5);
+		iResult = _ReadBufferLength_p2(rdData,11);
 		if(iResult == 1)
 		{
 			printf("read success\n");
-			printf("+++%s\n",rdData);
-			usleep(50);
-			//if(rdData==tdData)
-			//{printf("pass\n");}
-			//else
-			//{printf("fail\n");}
+			printf("%s\n",rdData);
+		//	usleep(50);
+			if(strncmp(rdData,tdData,11)==0)
+			{printf("pass\n");}
+			else
+			{printf("fail\n");}
 		}
 		else
 		{
