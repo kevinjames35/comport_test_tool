@@ -110,7 +110,7 @@ tcgetattr(fcom_p1, &SerialPortSettings);
 }
 
 /**********************************************/
-
+/*
 void* _IncomeInQueueThread_p1(void* object)
 {
 unsigned char tmpBuffer[60];
@@ -142,9 +142,9 @@ u_int8_t xch;
 //		}
 	}
 	return NULL;
-}
+}*/
 /**********************************************/
-
+/*
 void* _PrintIncomeInQueueThread_p1(void* object)
 {
 u_int8_t tmpBuffer[60];
@@ -174,7 +174,7 @@ int flag = 0;
 
 	}
 	return NULL;
-}
+}*/
 /******************************************/
 
 int _SendBufferLength_p1(u_int8_t* buffer, int32_t length)
@@ -190,6 +190,7 @@ printf("send CMD=%s\n", bptr);
 	return 1;
 }
 /**************/
+/*
 int _ReadBufferLength_p1(u_int8_t* buffer, int32_t length)
 {
 int32_t iResult = 0;
@@ -230,8 +231,9 @@ u_int8_t *bptr, xch;
 
 	return iResult;
 }
-
+*/
 /**************/
+/*
 int _ReadBuffer_p1(int8_t* buffer)
 {
 int iResult = 0;
@@ -278,7 +280,7 @@ int8_t *bptr, xch;
 	}
 
 	return iResult;
-}
+}*/
 /********************************************************/
 /******** for port 2*************************************/
 /********************************************************/
@@ -385,7 +387,7 @@ printf("%c",xch);
 	return NULL;
 }
 /******************************************/
-
+/*
 int _SendBufferLength_p2(u_int8_t* buffer, int32_t length)
 {
 u_int8_t *bptr;
@@ -397,7 +399,7 @@ u_int8_t *bptr;
 	write(fcom_p2, bptr, length);
 	tcdrain(fcom_p2);
 	return 1;
-}
+}*/
 /**************/
 int _ReadBufferLength_p2(u_int8_t* buffer, int32_t length)
 {
@@ -495,6 +497,7 @@ printf("---%c",xch);
 int32_t _OpenPort_p1(char *pComNum)
 {
 int iResult = 0;
+int DTR_flag;
 //char pComPath[40];
 //printf("%s\n",pComNum);
 //sprintf(pComPath,"/dev/ttyS%s",pComNum);
@@ -511,13 +514,19 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY | O_NDELAY);
 	pRxBufferEnd_p1 = &RxBuffer_p1[BUFFER_SIZE-1];
 	//hook receiver thread
 	//fcom=1;
-	pthread_mutex_init(&buf_mut_p1, NULL);
+	//pthread_mutex_init(&buf_mut_p1, NULL);
 	
 
 	set_interface_attribs_p1(B115200); 
 //pthread_create(&InQueueID, (pthread_attr_t*)(0), _IncomeInQueueThread, (void*)(0));
 
 //pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
+
+//=================Controll DTR pin===========================
+	DTR_flag = TIOCM_DTR;
+	ioctl(fcom_p1,TIOCMBITS,&DTR_flag);//set DTR
+
+	//ioctl(fcom_p1,TIOCMBITC,&DTR_flag);//clear DTR 
 	iResult = 1;
 	
 	
@@ -644,9 +653,9 @@ char default_message=1;
 	
 	close(fcom_p1);
 	close(fcom_p2);
-	pthread_cancel(InQueueID_p1);
+	//pthread_cancel(InQueueID_p1);
 	pthread_cancel(InQueueID_p2);	
-	pthread_mutex_destroy(&buf_mut_p1);
+	//pthread_mutex_destroy(&buf_mut_p1);
 	pthread_mutex_destroy(&buf_mut_p2);
 
 return 0;
