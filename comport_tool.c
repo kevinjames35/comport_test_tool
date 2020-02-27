@@ -421,8 +421,8 @@ char default_message=1;
 		{
 			default_message = 0 ;
 			strcpy(tdData,argv[count+1]);
-			data_size=sizeof(tdData);
-			printf("data size:%d",data_size);
+			data_size=strlen(tdData);
+			//printf("data size:%d",data_size);
 		}
 	}
 
@@ -430,20 +430,20 @@ char default_message=1;
 	if(default_message==1)
 	{
 		strcpy(tdData,"comport test");
-		data_size=sizeof(tdData);
-		printf("data size:%d",data_size);
+		data_size=strlen(tdData);
+		//printf("data size:%d",data_size);
 	}
 
-	iResult = _SendBufferLength_p1(tdData,12);
+	iResult = _SendBufferLength_p1(tdData,data_size);
 	if(iResult == 1)
 	{		
-		iResult = _ReadBufferLength_p2(rdData,12);
+		iResult = _ReadBufferLength_p2(rdData,data_size);
 		if(iResult == 1)
 		{
 			printf("transmit and receive data success\n");
 			//printf("%s\n",rdData);
 		//	usleep(50);
-			if(strncmp(rdData,tdData,1)==0)
+			if(strncmp(rdData,tdData,data_size)==0)
 			{printf("compare data pass\n");}
 			else
 			{printf("compare data fail\n");}
