@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include <ctype.h>
-
+#include <sys/ioctl.h>
 
 
 #define BUFFER_SIZE	1024
@@ -524,9 +524,9 @@ fcom_p1 = open(pComNum, O_RDWR | O_NOCTTY | O_NDELAY);
 
 //=================Controll DTR pin===========================
 	DTR_flag = TIOCM_DTR;
-	ioctl(fcom_p1,TIOCMBITS,&DTR_flag);//set DTR
+	ioctl(fcom_p1,TIOCMBIS,&DTR_flag);//set DTR
 
-	//ioctl(fcom_p1,TIOCMBITC,&DTR_flag);//clear DTR 
+	//ioctl(fcom_p1,TIOCMBIC,&DTR_flag);//clear DTR 
 	iResult = 1;
 	
 	
