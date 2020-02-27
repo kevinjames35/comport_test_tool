@@ -1,5 +1,17 @@
-
-
+//================================================================================================
+//		comport_tool.c
+//================================================================================================
+//Description:
+//	this tool is made for testing com port, use two different com port. transmit data from
+//one com port to another, and compare the transmit data and receive data show compare result.
+//	
+//Usage:			
+//	./com_util -t [PORT A] -r [PORT B]		-->trans default message from PORT A, receive from PORT B, return compare result
+//	./com_util -t [PORT A] -r [PORT B] -s [STRING]	-->trans STRING from PORT A to PORT B, return compare result
+//
+//Example:
+//	./com_util -t /dev/ttyS3 -r /dev/ttyS5				-->/dev/ttyS3 trans default message to /dev/ttyS5
+//	./com_util -t /dev/ttyS4 -r /dev/ttyS7 -s customer_message	-->/dev/ttyS4 trans special message to /dev/ttyS7, special message can't include space and need to be under 100 character
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -31,45 +43,6 @@ pthread_mutex_t buf_mut_p1,buf_mut_p2;
 u_int8_t RxBuffer_p1[BUFFER_SIZE];
 
 u_int8_t RxBuffer_p2[BUFFER_SIZE];
-
-int ascii_to_hex(char ch) 
-{ 
-char ch_tmp; 
-int hex_val = -1; 
-
-	ch_tmp = tolower(ch); 
-
-	if ((ch_tmp >= '0') && (ch_tmp <= '9')) { 
-		hex_val = ch_tmp - '0'; 
-	} 
-	else if ((ch_tmp >= 'a') && (ch_tmp <= 'f')) { 
-		hex_val = ch_tmp - 'a' + 10; 
-	} 
-
-	return hex_val; 
-} 
-/********************************************************/
-int32_t str_to_hex(char *hex_str) 
-{
-//receive string sample
-int i, len; 
-int32_t hex_tmp, hex_val; 
-char *bptr;
-	bptr = strstr(hex_str, "0x");
-	if ( bptr != NULL ) bptr+=2;
-	else 	bptr=hex_str;
-
-	len = (int)strlen(bptr); 
-	hex_val = 0; 
- 	for (i=0; i<len-1;i++) { 
-		hex_tmp = ascii_to_hex(bptr[i]); 
-		if (hex_tmp == -1) 
-		{ return -1; } 
-
-		hex_val = (hex_val) * 16 + hex_tmp; 
-	} 
-	return hex_val; 
-} 
 
 /***********************************************************/
 /********************************************************/
@@ -109,72 +82,7 @@ tcgetattr(fcom_p1, &SerialPortSettings);
         return 0;
 }
 
-/**********************************************/
-/*
-void* _IncomeInQueueThread_p1(void* object)
-{
-unsigned char tmpBuffer[60];
-int xi,n;
-u_int8_t xch;
-//printf("incoming\n");
-	while(1)
-	{
 
-		n=read(fcom_p1, tmpBuffer, 60);
-//printf("receive n=%d, \n", n);
-//fflush(stdout);
-		if ( n > 0 && n < 60 ) {
-//printf("receive n=%d, \n", n);
-			for ( xi=0 ; xi<n ; xi++) {
-					xch = tmpBuffer[xi];
-//printf("%c", xch);
-					pthread_mutex_lock(&buf_mut_p1);				
-					*pWritePtr_p1 = xch;
-					wRxCounter_p1++;
-					if ( pWritePtr_p1 == pRxBufferEnd_p1 ) pWritePtr_p1 = pRxBufferStart_p1;
-					else				    pWritePtr_p1++;
-					pthread_mutex_unlock(&buf_mut_p1);
-			}
-//printf("\n");
-		}
-//		else{
-//			usleep(5000);
-//		}
-	}
-	return NULL;
-}*/
-/**********************************************/
-/*
-void* _PrintIncomeInQueueThread_p1(void* object)
-{
-u_int8_t tmpBuffer[60];
-int xi,n;
-u_int8_t xch;
-int flag = 0;
-
-//printf("print incoming\n");
-	while(1)
-	{
-		n=read(fcom_p1, tmpBuffer, 60);
-		if ( n > 0 && n < 60 ) {
-			for ( xi=0 ; xi<n ; xi++) {
-				xch = tmpBuffer[xi];
-			
-				if ( xch == 0x3a)  {
-					flag = 1;
-					pReadPtr_p1 = pRxBufferStart_p1;
-				}
-				if ( flag == 1){
-					*pReadPtr_p1 = xch;
-					pReadPtr_p1++;
-				}
-			}
-//printf("\n");
-		}
-
-	}
-	return NULL;
-}*/
 /******************************************/
 
 int _SendBufferLength_p1(u_int8_t* buffer, int32_t length)
@@ -190,97 +98,7 @@ u_int8_t *bptr;
 	return 1;
 }
 /**************/
-/*
-int _ReadBufferLength_p1(u_int8_t* buffer, int32_t length)
-{
-int32_t iResult = 0;
-int32_t fEnding =0;
-int waitCnt, rxCnt;
-u_int8_t *bptr, xch;
 
-	if ( !fcom_p1 ) return iResult;
-	if ( length < 1 ) return iResult;
-	rxCnt=0;
-	waitCnt = 0;
-	bptr = buffer;
-	
-	while (!fEnding)
-	{
-		if ( wRxCounter_p1 == 0 ) 
-		{
-			usleep(2000); //2ms
-			waitCnt++;
-			if ( waitCnt >= 25 )  fEnding = 1;
-		}
-		else {
-			waitCnt = 0;
-			pthread_mutex_lock(&buf_mut_p1);
-			xch = *pReadPtr_p1;
-			*bptr++ = xch;
-			wRxCounter_p1--;
-			if ( pReadPtr_p1 == pRxBufferEnd_p1) pReadPtr_p1 = pRxBufferStart_p1;
-			else				  pReadPtr_p1++;
-			pthread_mutex_unlock(&buf_mut_p1);
-			rxCnt++;
-			if ( rxCnt == length )  {
-				iResult =1;
-				fEnding = 1;
-			}
-		}
-	}
-
-	return iResult;
-}
-*/
-/**************/
-/*
-int _ReadBuffer_p1(int8_t* buffer)
-{
-int iResult = 0;
-int fEnding =0;
-int waitCnt, rxCnt;
-int8_t *bptr, xch;
-
-	//if ( !fIgnOpened ) return iResult;
-	rxCnt=0;
-	waitCnt = 0;
-	bptr = buffer;
-	
-	while (!fEnding)
-	{
-		if ( wRxCounter_p1 == 0 ) 
-		{
-			sleep(5);
-			waitCnt++;
-			if ( waitCnt >= 25 )  fEnding = 1;
-		}
-		else {
-			waitCnt = 0;
-			pthread_mutex_lock(&buf_mut_p1);
-			xch = *pReadPtr_p1;
-			if ( xch != 0x3e && xch != 0x0a  && xch != 0x00 ) {
-				//maybe ignore all CTRL code 
-//printf("%c",xch);
-				*bptr++ = xch;
-				rxCnt++;
-			}
-			wRxCounter_p1--;
-			if ( pReadPtr_p1 == pRxBufferEnd_p1) pReadPtr_p1 = pRxBufferStart_p1;
-			else				  pReadPtr_p1++;
-			pthread_mutex_unlock(&buf_mut_p1);
-			
-			if ( (xch == 0x0a) | (xch ==0x3e) )  {
-
-				*bptr = 0x00;
-				iResult =1;
-				fEnding = 1;
-			}
-			
-		}
-	}
-
-	return iResult;
-}*/
 /********************************************************/
 /******** for port 2*************************************/
 /********************************************************/
@@ -387,20 +205,6 @@ int flag = 0;
 	}
 	return NULL;
 }
-/******************************************/
-/*
-int _SendBufferLength_p2(u_int8_t* buffer, int32_t length)
-{
-u_int8_t *bptr;
-	//_ReadBuffer_clear();
-	//if ( !fIgnOpened ) return 0;
-	if ( length < 1 ) return 0;
-	bptr = buffer;
-//printf("send CMD=%s\n", bptr);
-	write(fcom_p2, bptr, length);
-	tcdrain(fcom_p2);
-	return 1;
-}*/
 /**************/
 int _ReadBufferLength_p2(u_int8_t* buffer, int32_t length)
 {
@@ -579,9 +383,10 @@ int iResult = 0;
 //char *com_path = "/dev/ttyUSB0";
 
 char rdData[100];
-char tdData[35];
+char tdData[100];
 int rcvCnt=0;
 int count=0;
+int data_size=0;
 char default_message=1;
 	if(argc<2)
 	{		
@@ -615,37 +420,43 @@ char default_message=1;
 		if(strcmp("-s",argv[count])==0)
 		{
 			default_message = 0 ;
+			strcpy(tdData,argv[count+1]);
+			data_size=sizeof(tdData);
+			printf("data size:%d",data_size);
 		}
 	}
 
 
+	if(default_message==1)
+	{
+		strcpy(tdData,"comport test");
+		data_size=sizeof(tdData);
+		printf("data size:%d",data_size);
+	}
 
-	strcpy(tdData,"lanner test");
-	//pthread_create(&InQueueID_p1, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p1, (void*)(0));
-	//pthread_create(&InQueueID_p2, (pthread_attr_t*)(0), _PrintIncomeInQueueThread_p2, (void*)(0));
-	iResult = _SendBufferLength_p1(tdData,11);
+	iResult = _SendBufferLength_p1(tdData,12);
 	if(iResult == 1)
 	{		
-		iResult = _ReadBufferLength_p2(rdData,11);
+		iResult = _ReadBufferLength_p2(rdData,12);
 		if(iResult == 1)
 		{
-			printf("read success\n");
-			printf("%s\n",rdData);
+			printf("transmit and receive data success\n");
+			//printf("%s\n",rdData);
 		//	usleep(50);
-			if(strncmp(rdData,tdData,11)==0)
-			{printf("pass\n");}
+			if(strncmp(rdData,tdData,1)==0)
+			{printf("compare data pass\n");}
 			else
-			{printf("fail\n");}
+			{printf("compare data fail\n");}
 		}
 		else
 		{
-			printf("error\n");
+			printf("receive data fail\n");
 		}
 
 	}
 	else
 	{
-		printf("error\n");
+		printf("transmit data fail\n");
 	}
 
 		
